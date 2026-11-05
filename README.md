@@ -1,5 +1,19 @@
 <p align="center"><img src="icon.png" width="160" alt="StarNotes icon"></p>
 
+<p align="center">
+  <a href="https://github.com/toasty-wheeler/starsector-starnotes/releases/latest" title="No code needed: grab StarNotes.zip from the latest release and unzip it into Starsector/mods">
+    <img src="docs/download-button.svg" width="360" alt="Download latest version here">
+  </a>
+</p>
+
+<details>
+<summary><b>"I DON'T WANT THE CODE, JUST GIVE ME THE MOD"</b> (click me)</summary>
+<br>
+<img src="docs/just-give-me-the-exe.png" width="520" alt="Reddit post: I am new to GitHub and I have lots to say">
+
+Fair. Hit the orange button above, download <b>StarNotes.zip</b> from the release, unzip it into <code>Starsector/mods</code>, done. You never have to look at a single line of code.
+</details>
+
 # StarNotes
 
 **A notebook and a drawable star map for your Starsector campaign, on an amber CRT screen.**

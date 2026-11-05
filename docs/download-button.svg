@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="60" viewBox="0 0 360 60" role="img" aria-label="Download latest version here">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffc36b"/>
+      <stop offset="1" stop-color="#f08a1c"/>
+    </linearGradient>
+  </defs>
+  <rect x="1" y="1" width="358" height="58" rx="12" fill="url(#g)" stroke="#8a4a0a" stroke-width="2"/>
+  <g fill="none" stroke="#2a1604" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M38 17v20"/>
+    <path d="M30 30l8 8 8-8"/>
+    <path d="M27 43h22"/>
+  </g>
+  <text x="200" y="37" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="19" font-weight="700" fill="#2a1604">Download latest version here</text>
+</svg>
