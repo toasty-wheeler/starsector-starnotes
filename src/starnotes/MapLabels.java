@@ -23,7 +23,7 @@ public class MapLabels {
     private static final String[] FONT_PATHS = {
             "graphics/fonts/orbitron24aabold.fnt",
             "graphics/fonts/orbitron12.fnt",      // constellations
-            "graphics/fonts/insignia12a.fnt",     // star systems
+            "graphics/fonts/insignia12bold.fnt",  // star systems: solid strokes stay legible
             "graphics/fonts/victor10.fnt",
             "graphics/fonts/insignia15LTaa.fnt",
             "graphics/fonts/insignia21LTaa.fnt",

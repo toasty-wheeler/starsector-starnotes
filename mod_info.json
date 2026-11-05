@@ -2,7 +2,7 @@
   "id": "starnotes",
   "name": "StarNotes",
   "author": "toasty-wheeler",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "An amber CRT sector map you can draw and write on (pen with line styles, eraser, symbols, text, undo), with grid, constellation and system names, live slipstreams and the Abyss, plus note tabs with a full text editor and checklists. Press N on the campaign map, or find it in the Intel screen. Requires LazyLib.",
   "gameVersion": "0.98a",
   "dependencies": [

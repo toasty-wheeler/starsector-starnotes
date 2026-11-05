@@ -1,3 +1,8 @@
+0.7.2
+- Fully zoomed out, the map now reaches just into the red Abyss ring so its edge shows
+- Fixed: map text dragged while typing stayed stuck to the cursor, even after Enter
+- Star system names use a solid font that stays readable
+
 0.7.1
 - Constellation and star system names are a bit bigger and brighter
 - Zooming out stops at about the game's own map view (all star systems in view)

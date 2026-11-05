@@ -1279,6 +1279,7 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
                 }
             }
             if (sw > 0f) {
+                fitViewToAbyssEdge();
                 abyssTag = new NameTag();
                 // bottom-left of the region: the deep sample closest to a point a quarter of the way in
                 float tx = bx0 + (bx1 - bx0) * 0.22f;
@@ -1306,6 +1307,38 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
         } catch (Throwable t) {
             Global.getLogger(StarNotesPanel.class).warn("StarNotes: could not map the Abyss", t);
         }
+    }
+
+    /**
+     * Widens the fully-zoomed-out view on each side until it reaches a little way into the red Abyss
+     * ring, so its edge shows without the view drifting out over it.
+     */
+    private void fitViewToAbyssEdge() {
+        float cx = (viewX0 + viewX1) * 0.5f;
+        float cy = (viewY0 + viewY1) * 0.5f;
+        float into = 3500f; // how far into the ring the view reaches
+        viewX0 = Math.min(viewX0, ringEdge(viewX0, cy, -1f, 0f) - into);
+        viewX1 = Math.max(viewX1, ringEdge(viewX1, cy, 1f, 0f) + into);
+        viewY0 = Math.min(viewY0, ringEdge(cx, viewY0, 0f, -1f) - into);
+        viewY1 = Math.max(viewY1, ringEdge(cx, viewY1, 0f, 1f) + into);
+    }
+
+    /** Walks outward from (x, y) until the Abyss starts; returns that coordinate along the walk axis. */
+    private float ringEdge(float x, float y, float dx, float dy) {
+        Vector2f p = new Vector2f();
+        float max = 40000f;
+        for (float d = 0f; d <= max; d += 1000f) {
+            p.x = x + dx * d;
+            p.y = y + dy * d;
+            float depth = 0f;
+            try {
+                depth = Misc.getAbyssalDepth(p);
+            } catch (Throwable t) {
+                return dx != 0f ? x : y;
+            }
+            if (depth > 0.05f) return dx != 0f ? p.x : p.y;
+        }
+        return dx != 0f ? x : y; // no ring that way: keep the systems' edge
     }
 
     // =====================================================================
@@ -1703,7 +1736,7 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
                 e.consume();
             }
         } else if (e.isLMBUpEvent()) {
-            if (drawing || erasing || dragSym != null || panByLmb) {
+            if (drawing || erasing || dragSym != null || dragText != null || panByLmb) {
                 onLmbUp();
                 e.consume();
             }
@@ -1909,6 +1942,10 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
 
     /** Stops typing into a map text; an empty one is removed. */
     private void finishTextEdit() {
+        if (dragText != null) {
+            dragText = null;
+            save();
+        }
         if (editingText == null) return;
         if (editingText.text.trim().length() == 0) texts.remove(editingText);
         editingText = null;
@@ -2015,7 +2052,7 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
 
         // end a drag whose mouse button is no longer held (release can happen off-panel)
         try {
-            if (!Mouse.isButtonDown(0) && (drawing || erasing || dragSym != null || panByLmb)) onLmbUp();
+            if (!Mouse.isButtonDown(0) && (drawing || erasing || dragSym != null || dragText != null || panByLmb)) onLmbUp();
             if (panning && !panByLmb && !Mouse.isButtonDown(1) && !Mouse.isButtonDown(2)) panning = false;
         } catch (Throwable t) {
             // ignore
