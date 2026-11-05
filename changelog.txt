@@ -1,0 +1,40 @@
+0.7.0
+- Glitch effect on the StarNotes map every few seconds while your fleet is in the Abyss
+- Note checkboxes: checkbox button puts a box in front of the selected lines (press again to remove)
+- Click a box to tick it; ticked lines turn darker and get a line struck through them
+- Constellation names are half the size, star system names smaller too
+- Added TriOS icon and this changelog
+
+0.6.0
+- Text tool: write on the map in 4 sizes and 5 colors; drag, edit, erase and undo it
+- Pen line styles: solid, dashed, dash-dot
+- Map grid is now dash-dot, anchored to the map
+- "THE ABYSS" label sits in the bottom left of the Abyss and stays on screen
+- New notes start empty with a "Type a title..." prompt
+- Note titles use a larger font
+- Note editor: held keys repeat, Shift+Backspace works, Ctrl+Backspace/Delete remove words
+- Note editor: text selection (mouse drag, Shift+arrows, double-click, Ctrl+A), copy, cut, paste
+- Note editor: click to place the cursor, Home/End, word wrap, scrolling
+
+0.5.0
+- Map redrawn as an amber CRT screen: scanlines, rolling band, vignette, flicker, phosphor glow
+- Grid, constellation names and star system names on the map
+- Live hyperspace slipstreams, as shown on the game's own map
+- Red cloud over the Abyss
+- Smooth zooming
+- Requires LazyLib
+
+0.4.0
+- Left-side icon toolbar with pop-out options for colors, thickness, symbols and clearing
+- Experimental game-map background (removed in 0.5.0)
+
+0.3.0
+- Press N on the campaign map to open StarNotes full screen
+- Notes save on every keystroke
+
+0.2.0
+- Buttons drawn by the mod itself so they work inside the Intel screen
+- Note tabs: + New note, first line is the tab name, hover X to delete with confirmation
+
+0.1.0
+- First version: drawable sector map in the Intel screen with pen, eraser, symbols and undo

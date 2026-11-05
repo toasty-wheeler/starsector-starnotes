@@ -1,0 +1,5 @@
+{
+	# StarNotes: key that opens the full-screen StarNotes window on the campaign map.
+	# LWJGL key code. 49 = N. Other examples: 36 = J, 37 = K, 38 = L, 59 = F1 ... 68 = F10.
+	"starnotes_hotkey":49,
+}
