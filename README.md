@@ -6,6 +6,20 @@
 
 StarNotes gives you a place to plan: mark where the good salvage was, circle the system you need to come back to, sketch a route along the slipstreams, and keep checklists for your colonies, all saved inside your campaign.
 
+## Screenshots
+
+**The star map**, with notes drawn on it: arrows, text, symbols and circled systems, slipstreams and the Abyss in the bottom left.
+
+![StarNotes star map](docs/screenshots/star-map.png)
+
+**Notes**: note tabs on the left, a title line and a checklist with ticked-off lines.
+
+![StarNotes notes](docs/screenshots/notes.png)
+
+**In the Intel screen**: StarNotes also opens as an entry under the StarNotes tag (or press N on the campaign map for full screen).
+
+![StarNotes in the Intel tab](docs/screenshots/intel-tab.png)
+
 ## Features
 
 ### The map
