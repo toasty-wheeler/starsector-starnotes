@@ -1,3 +1,8 @@
+0.7.1
+- Constellation and star system names are a bit bigger and brighter
+- Zooming out stops at about the game's own map view (all star systems in view)
+- The map can no longer be panned away into empty space
+
 0.7.0
 - Glitch effect on the StarNotes map every few seconds while your fleet is in the Abyss
 - Note checkboxes: checkbox button puts a box in front of the selected lines (press again to remove)

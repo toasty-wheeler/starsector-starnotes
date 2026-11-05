@@ -267,7 +267,8 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
     private float dragTextDX, dragTextDY;
 
     // ---- view ----
-    private float minX, maxX, minY, maxY;          // pannable world area
+    private float minX, maxX, minY, maxY;          // world area used for sampling (Abyss etc.)
+    private float viewX0, viewX1, viewY0, viewY1;  // where the camera may go: the star systems, like the game's map
     private float secMinX, secMaxX, secMinY, secMaxY; // grid origin (sector rectangle)
     private boolean viewReady = false;
     private float baseScale = 1f;   // pixels per map unit at zoom 1 (whole sector fits)
@@ -1135,7 +1136,7 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
             d.y = loc.y;
             d.entered = entered;
             d.name = s.getBaseName();
-            d.labelId = label(d.name, MapLabels.MED, entered ? AMBER : AMBER_DIM);
+            d.labelId = label(d.name, MapLabels.MED, entered ? AMBER_HOT : AMBER);
             dots.add(d);
             x0 = Math.min(x0, d.x);
             x1 = Math.max(x1, d.x);
@@ -1187,6 +1188,14 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
         maxX = Math.max(secMaxX, x1 + 4000f);
         minY = Math.min(secMinY, y0 - 4000f);
         maxY = Math.max(secMaxY, y1 + 4000f);
+
+        // fully zoomed out = all known star systems with a small margin, about what the game's map shows
+        float padX = Math.max(3000f, (x1 - x0) * 0.05f);
+        float padY = Math.max(3000f, (y1 - y0) * 0.05f);
+        viewX0 = x0 - padX;
+        viewX1 = x1 + padX;
+        viewY0 = y0 - padY;
+        viewY1 = y1 + padY;
     }
 
     /** "ORION" -> "O R I O N" for the wide-tracked look of the game's constellation labels. */
@@ -1309,27 +1318,34 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
         float mh = mapH();
         if (mw <= 1f || mh <= 1f) return;
         // zoom 1 = the whole sector rectangle fits
-        baseScale = Math.min(mw / (secMaxX - secMinX), mh / (secMaxY - secMinY)) * 0.96f;
+        baseScale = Math.min(mw / (viewX1 - viewX0), (mh - STATUS_H) / (viewY1 - viewY0));
         if (savedView != null) {
             camX = savedView[0];
             camY = savedView[1];
             zoom = clampZoom(savedView[2] / baseScale);
         } else {
-            camX = (secMinX + secMaxX) * 0.5f;
-            camY = (secMinY + secMaxY) * 0.5f;
+            camX = (viewX0 + viewX1) * 0.5f;
+            camY = (viewY0 + viewY1) * 0.5f;
             zoom = 1f;
         }
         targetZoom = zoom;
         viewReady = true;
+        clampCam();
     }
 
     private float clampZoom(float z) {
-        return Math.max(0.55f, Math.min(40f, z));
+        return Math.max(1f, Math.min(40f, z)); // 1 = all systems fit; no zooming out past that
     }
 
+    /** Keeps the view inside the star-system area; if the area is smaller than the view, centers it. */
     private void clampCam() {
-        camX = Math.max(minX, Math.min(maxX, camX));
-        camY = Math.max(minY, Math.min(maxY, camY));
+        if (pos == null) return;
+        float halfW = mapW() * 0.5f / scale();
+        float halfH = (mapH() - STATUS_H) * 0.5f / scale();
+        if (viewX1 - viewX0 <= halfW * 2f) camX = (viewX0 + viewX1) * 0.5f;
+        else camX = Math.max(viewX0 + halfW, Math.min(viewX1 - halfW, camX));
+        if (viewY1 - viewY0 <= halfH * 2f) camY = (viewY0 + viewY1) * 0.5f;
+        else camY = Math.max(viewY0 + halfH, Math.min(viewY1 - halfH, camY));
     }
 
     private void rememberView() {
@@ -2610,13 +2626,13 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
         }
 
         // star systems: appear as you zoom in
-        float sysAlpha = Math.max(0f, Math.min(1f, (zoom - 1.6f) / 1.2f));
+        float sysAlpha = Math.max(0f, Math.min(1f, (zoom - 1.35f) / 0.9f));
         if (sysAlpha > 0.02f) {
             for (int i = 0; i < dots.size(); i++) {
                 Dot d = dots.get(i);
                 float px = toSX(d.x), py = toSY(d.y);
                 if (!onScreen(px, py, 80f)) continue;
-                drawLabel(d.labelId, px, py - 11f, sysAlpha * (d.entered ? 1f : 0.7f) * a);
+                drawLabel(d.labelId, px, py - 13f, sysAlpha * (d.entered ? 1f : 0.85f) * a);
             }
         }
     }
