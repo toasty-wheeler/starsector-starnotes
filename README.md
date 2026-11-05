@@ -6,20 +6,6 @@
 
 StarNotes gives you a place to plan: mark where the good salvage was, circle the system you need to come back to, sketch a route along the slipstreams, and keep checklists for your colonies, all saved inside your campaign.
 
-## Screenshots
-
-**The star map**, with notes drawn on it: arrows, text, symbols and circled systems, slipstreams and the Abyss in the bottom left.
-
-![StarNotes star map](docs/screenshots/star-map.png)
-
-**Notes**: note tabs on the left, a title line and a checklist with ticked-off lines.
-
-![StarNotes notes](docs/screenshots/notes.png)
-
-**In the Intel screen**: StarNotes also opens as an entry under the StarNotes tag (or press N on the campaign map for full screen).
-
-![StarNotes in the Intel tab](docs/screenshots/intel-tab.png)
-
 ## Features
 
 ### The map
@@ -30,6 +16,8 @@ StarNotes gives you a place to plan: mark where the good salvage was, circle the
 - **The Abyss** drawn as a slowly breathing red cloud. When your fleet is inside it, the screen glitches every few seconds.
 - Your fleet's position as a pulsing crosshair.
 - Smooth zoom toward the cursor (mouse wheel) and panning (right-drag).
+
+![StarNotes star map](docs/screenshots/star-map.png)
 
 ### Drawing tools
 Icon toolbar on the left; click a tool again to open its options.
@@ -50,11 +38,15 @@ Icon toolbar on the left; click a tool again to open its options.
 - **Checklists:** the checkbox button puts a box in front of the selected lines. Click a box to tick it and the line is dimmed and struck through.
 - Hover a note tab and click the X to delete it (with confirmation).
 
+![StarNotes notes](docs/screenshots/notes.png)
+
 ## Opening StarNotes
 - Press **N** on the campaign map for the full-screen window (Esc or Close to leave). The game pauses while it's open.
 - Or open the **Intel** screen and pick the **StarNotes** entry / tag.
 
 The key can be changed in `data/config/settings.json` (`starnotes_hotkey`, an LWJGL key code: 49 = N, 37 = K, 38 = L...).
+
+![StarNotes in the Intel screen](docs/screenshots/intel-tab.png)
 
 ## Requirements
 
