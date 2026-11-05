@@ -7,7 +7,7 @@
 </p>
 
 <details>
-<summary><b>"I DON'T WANT THE CODE, JUST GIVE ME THE MOD"</b> (click me)</summary>
+<summary><b>"I DON'T WANT THE CODE, JUST GIVE ME THE MOD"</b></summary>
 <br>
 <img src="docs/just-give-me-the-exe.png" width="520" alt="Reddit post: I am new to GitHub and I have lots to say">
 
