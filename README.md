@@ -11,7 +11,7 @@
 <br>
 <img src="docs/just-give-me-the-exe.png" width="520" alt="Reddit post: I am new to GitHub and I have lots to say">
 
-Fair. Hit the orange button above, download <b>StarNotes.zip</b> from the release, unzip it into <code>Starsector/mods</code>, done. You never have to look at a single line of code.
+Hit the orange button above, download <b>StarNotes.zip</b> from the release, unzip it into <code>Starsector/mods</code>, done. You never have to look at a single line of code.
 </details>
 
 # StarNotes
