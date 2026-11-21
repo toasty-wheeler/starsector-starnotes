@@ -1,3 +1,6 @@
+0.7.3
+- StarNotes is now listed at the top of the Intel screen's Exploration tab instead of in a tab of its own
+
 0.7.2
 - Fully zoomed out, the map now reaches just into the red Abyss ring so its edge shows
 - Fixed: map text dragged while typing stayed stuck to the cursor, even after Enter

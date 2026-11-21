@@ -1,5 +1,7 @@
 package starnotes;
 
+import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin.IntelSortTier;
+import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.SectorMapAPI;
@@ -31,10 +33,16 @@ public class StarNotesIntel extends BaseIntelPlugin {
         return "graphics/icons/intel/log_crosshair.png";
     }
 
+    /** Listed in the Intel screen's Exploration tab rather than a tab of its own. */
     public Set<String> getIntelTags(SectorMapAPI map) {
         Set<String> tags = super.getIntelTags(map);
-        tags.add(TAG);
+        tags.add(Tags.INTEL_EXPLORATION);
         return tags;
+    }
+
+    /** The highest sort tier, so StarNotes stays at the top of the Exploration list. */
+    public IntelSortTier getSortTier() {
+        return IntelSortTier.TIER_0;
     }
 
     public boolean hasSmallDescription() {

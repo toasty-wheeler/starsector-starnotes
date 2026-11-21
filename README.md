@@ -56,7 +56,7 @@ Icon toolbar on the left; click a tool again to open its options.
 
 ## Opening StarNotes
 - Press **N** on the campaign map for the full-screen window (Esc or Close to leave). The game pauses while it's open.
-- Or open the **Intel** screen and pick the **StarNotes** entry / tag.
+- Or open the **Intel** screen, go to the **Exploration** tab, and pick **StarNotes** at the top of the list.
 
 The key can be changed in `data/config/settings.json` (`starnotes_hotkey`, an LWJGL key code: 49 = N, 37 = K, 38 = L...).
 
