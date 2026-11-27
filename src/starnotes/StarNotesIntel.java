@@ -1,6 +1,8 @@
 package starnotes;
 
+import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin.IntelSortTier;
+import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin.ListInfoMode;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
@@ -8,6 +10,7 @@ import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 
+import java.awt.Color;
 import java.util.Set;
 
 /**
@@ -22,7 +25,18 @@ public class StarNotesIntel extends BaseIntelPlugin {
     }
 
     public String getName() {
-        return "StarNotes  (or press " + StarNotesHotkey.getKeyName() + " on the map for full screen)";
+        return "StarNotes";
+    }
+
+    /** Laid out like the game's own entries: the title in the faction colour, a grey bullet with the hotkey in yellow. */
+    public void createIntelInfo(TooltipMakerAPI info, ListInfoMode mode) {
+        Color title = Global.getSector().getPlayerFaction().getBaseUIColor();
+        info.addPara(getName(), title, 0f);
+        float pad = mode == ListInfoMode.IN_DESC ? 10f : 3f;
+        Color tc = mode == ListInfoMode.INTEL ? Misc.getGrayColor() : Misc.getTextColor();
+        bullet(info);
+        info.addPara("Press %s on the map for full screen", pad, tc, Misc.getHighlightColor(), StarNotesHotkey.getKeyName());
+        unindent(info);
     }
 
     public String getSmallDescriptionTitle() {

@@ -2,6 +2,7 @@
 - With LunaLib installed, the StarNotes hotkey can be rebound in LunaLib's mod settings (F2 on the campaign map), with a list of the controls below it
 - New map symbols: target, sun, chest and skull. Square and star are gone from the palette (markers you already placed with them stay on your map)
 - The symbol palette is now two rows of four
+- The Intel entry now looks like the game's own: "StarNotes" title in your faction colour, with a grey reminder below it and the hotkey in yellow
 
 0.7.3
 - StarNotes is now listed at the top of the Intel screen's Exploration tab instead of in a tab of its own
