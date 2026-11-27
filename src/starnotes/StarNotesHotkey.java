@@ -13,6 +13,15 @@ import org.lwjgl.input.Keyboard;
 public class StarNotesHotkey implements CampaignInputListener {
 
     public static int getKey() {
+        // LunaLib's mod settings (F2 in the campaign) win when LunaLib is installed
+        try {
+            if (Global.getSettings().getModManager().isModEnabled("lunalib")) {
+                int k = LunaBridge.hotkey();
+                if (k > 0) return k;
+            }
+        } catch (Throwable t) {
+            // LunaLib missing or changed: fall back to settings.json
+        }
         try {
             int k = Global.getSettings().getInt("starnotes_hotkey");
             if (k > 0) return k;
@@ -39,7 +48,7 @@ public class StarNotesHotkey implements CampaignInputListener {
     public void processCampaignInputPreCore(List<InputEventAPI> events) {
         int key = getKey();
         for (int i = 0; i < events.size(); i++) {
-            InputEventAPI e = events.get(i);
+            InputEventAPI e = (InputEventAPI) events.get(i);
             if (e.isConsumed() || !e.isKeyDownEvent() || e.isRepeat()) continue;
             if (e.getEventValue() != key) continue;
             if (e.isCtrlDown() || e.isAltDown() || e.isShiftDown()) continue;

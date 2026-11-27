@@ -1,0 +1,10 @@
+fieldID,fieldName,fieldType,defaultValue,secondaryValue,fieldDescription,minValue,maxValue,tab
+starnotes_header,StarNotes,Header,StarNotes,,,,,
+starnotes_hotkey,Open StarNotes,Keycode,49,,"Opens the full-screen StarNotes window on the campaign map. StarNotes is also always in the [Intel] screen, under [Exploration].",,,
+starnotes_controls,Controls,Text,"- [Mouse wheel]: zoom toward the cursor
+- [Right-drag]: pan the map
+- [Ctrl + Z]: undo the last change
+- [Click a tool again]: open its options (colours, sizes, symbols)
+- [Ctrl + A / C / X / V]: select all, copy, cut and paste in notes
+- [Shift + arrows] or drag: select text in notes
+- [Esc]: close StarNotes",,,,,

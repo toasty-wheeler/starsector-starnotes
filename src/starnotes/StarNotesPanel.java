@@ -126,7 +126,11 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
     };
     private static final String[] SIZE_NAMES = {"Thin", "Medium", "Thick"};
     private static final float[] SIZES = {2f, 4f, 8f};
-    private static final String[] SYMBOL_NAMES = {"X mark", "Square", "Triangle", "Diamond", "Star", "Ring"};
+    // the symbol palette: names and the type ids saved with each marker (1 = square and 4 = star are retired from
+    // the palette, but markers already placed with them still draw)
+    private static final String[] SYMBOL_NAMES = {"X mark", "Triangle", "Diamond", "Ring", "Target", "Sun", "Chest", "Skull"};
+    private static final int[] SYMBOL_TYPES = {0, 2, 3, 5, 6, 7, 8, 9};
+    private static final int SYMBOL_COLS = 4;
 
     // ---- data model ----
     private static class Stroke {
@@ -383,7 +387,7 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
     private int label(String text, int kind, Color c) {
         if (labels == null || text == null || text.length() == 0) return -1;
         String key = kind + "|" + c.getRGB() + "|" + text;
-        Integer id = labelIds.get(key);
+        Integer id = (Integer) labelIds.get(key);
         if (id != null) return id.intValue();
         try {
             int nid = labels.add(text, kind, c);
@@ -418,7 +422,7 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
         buttons.add(new Btn("plus", "+  New note", 0f, 0f, SIDE_W, TAB_H));
         buttons.add(new Btn("tab0", "Map", 0f, ROW, SIDE_W, TAB_H));
         for (int k = 0; k < notes.size(); k++) {
-            buttons.add(new Btn("tab" + (k + 1), nameOf(notes.get(k)), 0f, ROW * (k + 2), SIDE_W - X_ZONE, TAB_H));
+            buttons.add(new Btn("tab" + (k + 1), nameOf((String) notes.get(k)), 0f, ROW * (k + 2), SIDE_W - X_ZONE, TAB_H));
         }
         if (onClose != null) {
             buttons.add(new Btn("close", "Close  (Esc)", 0f, panelH - TAB_H, SIDE_W, TAB_H));
@@ -466,7 +470,7 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
         labelsTt = panel.createUIElement(panelW, panelH, false);
         Color text = Misc.getTextColor();
         for (int i = 0; i < buttons.size(); i++) {
-            Btn b = buttons.get(i);
+            Btn b = (Btn) buttons.get(i);
             if (b.icon != IC_TEXT) continue;
             Color c = b.accent != null ? b.accent : (b.danger ? new Color(255, 140, 140) : text);
             LabelAPI l = labelsTt.addPara(b.text, c, 0f);
@@ -483,7 +487,7 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
         } else if (viewMode > 0 && viewMode - 1 < notes.size() && pendingDelete < 0) {
             float cw = panelW - CONTENT_X;
             if (editorFor != viewMode) {
-                editor.setText(notes.get(viewMode - 1));
+                editor.setText((String) notes.get(viewMode - 1));
                 editorFor = viewMode;
                 editorSavedVersion = editor.getVersion();
                 caretOn = true;
@@ -507,7 +511,7 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
         if (pendingDelete >= 0 && pendingDelete < notes.size()) {
             float dw = 320f;
             float dh = 90f;
-            LabelAPI q = labelsTt.addPara("Delete the note \"" + nameOf(notes.get(pendingDelete)) + "\"?\nThis cannot be undone.",
+            LabelAPI q = labelsTt.addPara("Delete the note \"" + nameOf((String) notes.get(pendingDelete)) + "\"?\nThis cannot be undone.",
                     Misc.getHighlightColor(), 0f);
             q.setAlignment(Alignment.TMID);
             q.getPosition().setSize(dw - 20f, 40f);
@@ -533,7 +537,7 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
         Btn anchor = null;
         String anchorId = flyout == FLY_PEN ? "tool0" : (flyout == FLY_SYMBOLS ? "tool2" : (flyout == FLY_TEXT ? "tool4" : "clearMenu"));
         for (int i = 0; i < buttons.size(); i++) {
-            if (buttons.get(i).id.equals(anchorId)) anchor = buttons.get(i);
+            if (((Btn) buttons.get(i)).id.equals(anchorId)) anchor = (Btn) buttons.get(i);
         }
         if (anchor == null) return;
 
@@ -565,18 +569,19 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
             rows = 3;
         } else if (flyout == FLY_SYMBOLS) {
             for (int i = 0; i < SYMBOL_NAMES.length; i++) {
-                Btn b = iconBtn("sym" + i, IC_SYMBOL, SYMBOL_NAMES[i], x0 + i * step, y0, CELL);
-                b.arg = i;
+                Btn b = iconBtn("sym" + i, IC_SYMBOL, SYMBOL_NAMES[i], x0 + (i % SYMBOL_COLS) * step, y0 + (i / SYMBOL_COLS) * step, CELL);
+                b.arg = SYMBOL_TYPES[i];
                 flyBtns.add(b);
             }
+            int symRows = (SYMBOL_NAMES.length + SYMBOL_COLS - 1) / SYMBOL_COLS;
             for (int i = 0; i < COLORS.length; i++) {
-                Btn b = iconBtn("color" + i, IC_SWATCH, COLOR_NAMES[i], x0 + i * step, y0 + step, CELL);
+                Btn b = iconBtn("color" + i, IC_SWATCH, COLOR_NAMES[i], x0 + i * step, y0 + symRows * step, CELL);
                 b.arg = i;
                 b.accent = COLORS[i];
                 flyBtns.add(b);
             }
-            cols = SYMBOL_NAMES.length;
-            rows = 2;
+            cols = Math.max(SYMBOL_COLS, COLORS.length);
+            rows = symRows + 1;
         } else if (flyout == FLY_TEXT) {
             for (int i = 0; i < TSIZE_NAMES.length; i++) {
                 Btn b = iconBtn("tsize" + i, IC_TSIZE, TSIZE_NAMES[i], x0 + i * step, y0, CELL);
@@ -663,11 +668,11 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
     private Btn buttonAt(float px, float py) {
         if (pendingDelete < 0) {
             for (int i = flyBtns.size() - 1; i >= 0; i--) {
-                if (over(flyBtns.get(i), px, py)) return flyBtns.get(i);
+                if (over((Btn) flyBtns.get(i), px, py)) return (Btn) flyBtns.get(i);
             }
         }
         for (int i = buttons.size() - 1; i >= 0; i--) {
-            Btn b = buttons.get(i);
+            Btn b = (Btn) buttons.get(i);
             if (pendingDelete >= 0 && !b.id.startsWith("confirm")) continue;
             if (over(b, px, py)) return b;
         }
@@ -815,7 +820,7 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
             return;
         }
         if (id.startsWith("sym") && (k = suffix(id, "sym")) >= 0 && k < SYMBOL_NAMES.length) {
-            symIdx = k;
+            symIdx = SYMBOL_TYPES[k];
             tool = TOOL_SYMBOL;
         }
     }
@@ -860,7 +865,7 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
 
     private String currentNote() {
         if (viewMode <= 0 || viewMode - 1 >= notes.size()) return null;
-        return notes.get(viewMode - 1);
+        return (String) notes.get(viewMode - 1);
     }
 
     private void setCurrentNote(String t) {
@@ -1091,7 +1096,7 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
     private void saveNotesNow() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < notes.size(); i++) {
-            sb.append(esc(notes.get(i))).append('\n');
+            sb.append(esc((String) notes.get(i))).append('\n');
         }
         Global.getSector().getPersistentData().put(NOTES_KEY, sb.toString());
     }
@@ -1215,14 +1220,14 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
             boolean sensorsOn = Global.getSettings().isCampaignSensorsOn();
             List<CampaignTerrainAPI> terrain = Global.getSector().getHyperspace().getTerrainCopy();
             for (int i = 0; i < terrain.size(); i++) {
-                CampaignTerrainPlugin p = terrain.get(i).getPlugin();
+                CampaignTerrainPlugin p = ((CampaignTerrainAPI) terrain.get(i)).getPlugin();
                 if (!(p instanceof SlipstreamTerrainPlugin2)) continue;
                 SlipstreamTerrainPlugin2 sp = (SlipstreamTerrainPlugin2) p;
                 float streamAlpha = sp.isDespawning() ? 0.45f : 1f;
                 List<SlipstreamTerrainPlugin2.SlipstreamSegment> segs = sp.getSegments();
                 ArrayList<float[]> run = null;
                 for (int j = 0; j < segs.size(); j++) {
-                    SlipstreamTerrainPlugin2.SlipstreamSegment seg = segs.get(j);
+                    SlipstreamTerrainPlugin2.SlipstreamSegment seg = (SlipstreamTerrainPlugin2.SlipstreamSegment) segs.get(j);
                     float b = 1f;
                     try {
                         if (seg.fader != null) b = seg.fader.getBrightness();
@@ -1288,7 +1293,7 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
                 abyssTag.x = sx / sw;
                 abyssTag.y = sy / sw;
                 for (int i = 0; i < abyssBlobs.size(); i++) {
-                    float[] b = abyssBlobs.get(i);
+                    float[] b = (float[]) abyssBlobs.get(i);
                     if (b[3] < 0.3f) continue;
                     float d = (b[0] - tx) * (b[0] - tx) + (b[1] - ty) * (b[1] - ty);
                     if (d < bestD) {
@@ -1456,21 +1461,21 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
     private String serialize() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < strokes.size(); i++) {
-            Stroke s = strokes.get(i);
+            Stroke s = (Stroke) strokes.get(i);
             sb.append("S;").append(s.color).append(';').append(s.width).append(';');
             for (int j = 0; j < s.pts.size(); j++) {
-                float[] p = s.pts.get(j);
+                float[] p = (float[]) s.pts.get(j);
                 if (j > 0) sb.append(',');
                 sb.append(p[0]).append(',').append(p[1]);
             }
             sb.append(';').append(s.style).append('\n');
         }
         for (int i = 0; i < symbols.size(); i++) {
-            Symbol m = symbols.get(i);
+            Symbol m = (Symbol) symbols.get(i);
             sb.append("M;").append(m.type).append(';').append(m.color).append(';').append(m.x).append(';').append(m.y).append('\n');
         }
         for (int i = 0; i < texts.size(); i++) {
-            MapText t = texts.get(i);
+            MapText t = (MapText) texts.get(i);
             if (t.text.trim().length() == 0) continue;
             sb.append("T;").append(t.color).append(';').append(t.size).append(';').append(t.x).append(';').append(t.y)
                     .append(';').append(esc(t.text)).append('\n');
@@ -1557,7 +1562,7 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
             flash("Nothing to undo");
             return;
         }
-        deserialize(undoStack.remove(undoStack.size() - 1));
+        deserialize((String) undoStack.remove(undoStack.size() - 1));
         save();
         flash("Undone");
     }
@@ -1580,7 +1585,7 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
         ensureView();
 
         for (int i = 0; i < events.size(); i++) {
-            InputEventAPI e = events.get(i);
+            InputEventAPI e = (InputEventAPI) events.get(i);
             if (e.isConsumed()) continue;
 
             // ---------- keyboard ----------
@@ -1831,7 +1836,7 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
 
     private void onLmbUp() {
         if (drawing && curStroke != null && curStroke.pts.size() == 1) {
-            float[] p = curStroke.pts.get(0);
+            float[] p = (float[]) curStroke.pts.get(0);
             curStroke.pts.add(new float[]{p[0], p[1]});
         }
         boolean changed = drawing || erasing || dragSym != null || dragText != null;
@@ -1855,7 +1860,7 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
 
     private void onMove(float dx, float dy) {
         if (drawing && curStroke != null) {
-            float[] last = curStroke.pts.get(curStroke.pts.size() - 1);
+            float[] last = (float[]) curStroke.pts.get(curStroke.pts.size() - 1);
             float lx = toSX(last[0]);
             float ly = toSY(last[1]);
             float ddx = mx - lx;
@@ -1883,7 +1888,7 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
 
     private Symbol symbolAt(float px, float py) {
         for (int i = symbols.size() - 1; i >= 0; i--) {
-            Symbol m = symbols.get(i);
+            Symbol m = (Symbol) symbols.get(i);
             float dx = toSX(m.x) - px;
             float dy = toSY(m.y) - py;
             if (dx * dx + dy * dy <= 13f * 13f) return m;
@@ -1894,13 +1899,13 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
     private void eraseAt() {
         float r = 12f;
         for (int i = strokes.size() - 1; i >= 0; i--) {
-            Stroke s = strokes.get(i);
+            Stroke s = (Stroke) strokes.get(i);
             if (strokeHit(s, mx, my, r + s.width * 0.5f)) {
                 strokes.remove(i);
             }
         }
         for (int i = symbols.size() - 1; i >= 0; i--) {
-            Symbol m = symbols.get(i);
+            Symbol m = (Symbol) symbols.get(i);
             float dx = toSX(m.x) - mx;
             float dy = toSY(m.y) - my;
             if (dx * dx + dy * dy <= (r + 10f) * (r + 10f)) {
@@ -1908,7 +1913,7 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
             }
         }
         for (int i = texts.size() - 1; i >= 0; i--) {
-            float[] b = textBounds(texts.get(i));
+            float[] b = textBounds((MapText) texts.get(i));
             if (mx >= b[0] - r && mx <= b[2] + r && my >= b[1] - r && my <= b[3] + r) {
                 if (texts.get(i) == editingText) editingText = null;
                 texts.remove(i);
@@ -1934,8 +1939,8 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
 
     private MapText textAt(float px, float py) {
         for (int i = texts.size() - 1; i >= 0; i--) {
-            float[] b = textBounds(texts.get(i));
-            if (px >= b[0] && px <= b[2] && py >= b[1] && py <= b[3]) return texts.get(i);
+            float[] b = textBounds((MapText) texts.get(i));
+            if (px >= b[0] && px <= b[2] && py >= b[1] && py <= b[3]) return (MapText) texts.get(i);
         }
         return null;
     }
@@ -2002,14 +2007,14 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
     private boolean strokeHit(Stroke s, float px, float py, float r) {
         int n = s.pts.size();
         if (n == 0) return false;
-        float[] p0 = s.pts.get(0);
+        float[] p0 = (float[]) s.pts.get(0);
         float ax = toSX(p0[0]);
         float ay = toSY(p0[1]);
         if (n == 1) {
             return dist2(ax, ay, px, py) <= r * r;
         }
         for (int i = 1; i < n; i++) {
-            float[] p = s.pts.get(i);
+            float[] p = (float[]) s.pts.get(i);
             float bx = toSX(p[0]);
             float by = toSY(p[1]);
             if (segDist2(px, py, ax, ay, bx, by) <= r * r) return true;
@@ -2108,7 +2113,7 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
             ArrayList<String> actions = new ArrayList<String>(pendingActions);
             pendingActions.clear();
             for (int i = 0; i < actions.size(); i++) {
-                handleAction(actions.get(i));
+                handleAction((String) actions.get(i));
             }
         }
 
@@ -2117,9 +2122,9 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
             nameCheckTimer -= amount;
             if (nameCheckTimer <= 0f && viewMode > 0 && viewMode - 1 < notes.size()) {
                 String id = "tab" + viewMode;
-                String want = nameOf(notes.get(viewMode - 1));
+                String want = nameOf((String) notes.get(viewMode - 1));
                 for (int i = 0; i < buttons.size(); i++) {
-                    Btn b = buttons.get(i);
+                    Btn b = (Btn) buttons.get(i);
                     if (b.id.equals(id) && !b.text.equals(want)) rebuildNeeded = true;
                 }
             }
@@ -2165,7 +2170,7 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
         float best = 11f * 11f;
         String name = null;
         for (int i = 0; i < dots.size(); i++) {
-            Dot d = dots.get(i);
+            Dot d = (Dot) dots.get(i);
             float d2 = dist2(toSX(d.x), toSY(d.y), mx, my);
             if (d2 <= best) {
                 best = d2;
@@ -2248,7 +2253,7 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
         }
 
         for (int i = 0; i < buttons.size(); i++) {
-            Btn b = buttons.get(i);
+            Btn b = (Btn) buttons.get(i);
             if (pendingDelete >= 0 && !b.id.startsWith("confirm")) continue;
             drawButton(b, alphaMult);
         }
@@ -2273,7 +2278,7 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
             GL11.glVertex2f(left, top - 24f);
             GL11.glEnd();
             for (int i = 0; i < flyBtns.size(); i++) {
-                drawButton(flyBtns.get(i), alphaMult);
+                drawButton((Btn) flyBtns.get(i), alphaMult);
             }
         }
 
@@ -2473,7 +2478,7 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
         if (abyssBlobs.isEmpty()) return;
         float s = scale();
         for (int i = 0; i < abyssBlobs.size(); i++) {
-            float[] b = abyssBlobs.get(i);
+            float[] b = (float[]) abyssBlobs.get(i);
             float px = toSX(b[0]);
             float py = toSY(b[1]);
             float r = b[2] * s;
@@ -2539,12 +2544,12 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
         if (streams.isEmpty()) return;
         float s = scale();
         for (int i = 0; i < streams.size(); i++) {
-            ArrayList<float[]> run = streams.get(i);
+            ArrayList<float[]> run = (ArrayList<float[]>) streams.get(i);
             // body: a band as wide as the stream, plus a brighter core line
             GL11.glBegin(GL11.GL_QUADS);
             for (int j = 0; j + 1 < run.size(); j++) {
-                float[] p = run.get(j);
-                float[] q = run.get(j + 1);
+                float[] p = (float[]) run.get(j);
+                float[] q = (float[]) run.get(j + 1);
                 float ax = toSX(p[0]), ay = toSY(p[1]);
                 float bx = toSX(q[0]), by = toSY(q[1]);
                 float hwA = Math.max(1.5f, p[2] * s);
@@ -2566,7 +2571,7 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
             GL11.glLineWidth(1.5f);
             GL11.glBegin(GL11.GL_LINE_STRIP);
             for (int j = 0; j < run.size(); j++) {
-                float[] p = run.get(j);
+                float[] p = (float[]) run.get(j);
                 GL11.glColor4f(STREAM.getRed() / 255f, STREAM.getGreen() / 255f, STREAM.getBlue() / 255f, 0.45f * p[3] * a);
                 GL11.glVertex2f(toSX(p[0]), toSY(p[1]));
             }
@@ -2580,8 +2585,8 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
             GL11.glPointSize(pointSize);
             GL11.glBegin(GL11.GL_POINTS);
             for (int j = 0; j + 1 < run.size(); j++) {
-                float[] p = run.get(j);
-                float[] q = run.get(j + 1);
+                float[] p = (float[]) run.get(j);
+                float[] q = (float[]) run.get(j + 1);
                 float dx = q[0] - p[0], dy = q[1] - p[1];
                 float len = (float) Math.sqrt(dx * dx + dy * dy);
                 if (len < 0.01f) continue;
@@ -2602,7 +2607,7 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
 
     private void drawSystemDots(float a) {
         for (int i = 0; i < dots.size(); i++) {
-            Dot d = dots.get(i);
+            Dot d = (Dot) dots.get(i);
             float px = toSX(d.x);
             float py = toSY(d.y);
             if (!onScreen(px, py, 20f)) continue;
@@ -2656,7 +2661,7 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
         // constellations: strongest when zoomed out, fading as system names take over
         float conAlpha = Math.max(0.18f, Math.min(0.8f, 1.1f - (zoom - 1f) * 0.25f));
         for (int i = 0; i < constellations.size(); i++) {
-            NameTag n = constellations.get(i);
+            NameTag n = (NameTag) constellations.get(i);
             float px = toSX(n.x), py = toSY(n.y);
             if (!onScreen(px, py, 200f)) continue;
             drawLabel(n.labelId, px, py, conAlpha * a);
@@ -2666,7 +2671,7 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
         float sysAlpha = Math.max(0f, Math.min(1f, (zoom - 1.35f) / 0.9f));
         if (sysAlpha > 0.02f) {
             for (int i = 0; i < dots.size(); i++) {
-                Dot d = dots.get(i);
+                Dot d = (Dot) dots.get(i);
                 float px = toSX(d.x), py = toSY(d.y);
                 if (!onScreen(px, py, 80f)) continue;
                 drawLabel(d.labelId, px, py - 13f, sysAlpha * (d.entered ? 1f : 0.85f) * a);
@@ -2678,7 +2683,7 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
         if (texts.isEmpty()) return;
         if (labels != null) {
             for (int i = 0; i < texts.size(); i++) {
-                MapText t = texts.get(i);
+                MapText t = (MapText) texts.get(i);
                 float px = toSX(t.x), py = toSY(t.y);
                 if (!onScreen(px, py, 600f)) continue;
                 String shown = t.text.length() == 0 ? " " : t.text;
@@ -2743,7 +2748,7 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
     private boolean abyssVisible() {
         float s = scale();
         for (int i = 0; i < abyssBlobs.size(); i += 3) {
-            float[] b = abyssBlobs.get(i);
+            float[] b = (float[]) abyssBlobs.get(i);
             if (b[3] > 0.2f && onScreen(toSX(b[0]), toSY(b[1]), -10f)) return true;
         }
         return false;
@@ -3180,14 +3185,14 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
 
     private void drawStrokes(float alpha) {
         for (int i = 0; i < strokes.size(); i++) {
-            Stroke s = strokes.get(i);
+            Stroke s = (Stroke) strokes.get(i);
             Color c = COLORS[Math.max(0, Math.min(COLORS.length - 1, s.color))];
             setColor(c, 0.95f * alpha);
             if (s.style != 0) {
                 float[] sp = new float[s.pts.size() * 2];
                 for (int j = 0; j < s.pts.size(); j++) {
-                    sp[j * 2] = toSX(s.pts.get(j)[0]);
-                    sp[j * 2 + 1] = toSY(s.pts.get(j)[1]);
+                    sp[j * 2] = toSX(((float[]) s.pts.get(j))[0]);
+                    sp[j * 2 + 1] = toSY(((float[]) s.pts.get(j))[1]);
                 }
                 patternedLine(sp, s.width, s.style);
                 continue;
@@ -3195,14 +3200,14 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
             GL11.glLineWidth(s.width);
             GL11.glBegin(GL11.GL_LINE_STRIP);
             for (int j = 0; j < s.pts.size(); j++) {
-                float[] p = s.pts.get(j);
+                float[] p = (float[]) s.pts.get(j);
                 GL11.glVertex2f(toSX(p[0]), toSY(p[1]));
             }
             GL11.glEnd();
             GL11.glPointSize(s.width);
             GL11.glBegin(GL11.GL_POINTS);
             for (int j = 0; j < s.pts.size(); j++) {
-                float[] p = s.pts.get(j);
+                float[] p = (float[]) s.pts.get(j);
                 GL11.glVertex2f(toSX(p[0]), toSY(p[1]));
             }
             GL11.glEnd();
@@ -3254,13 +3259,13 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
         GL11.glEnd();
         GL11.glPointSize(width + 1.5f);
         GL11.glBegin(GL11.GL_POINTS);
-        for (int i = 0; i < dots.size(); i++) GL11.glVertex2f(dots.get(i)[0], dots.get(i)[1]);
+        for (int i = 0; i < dots.size(); i++) GL11.glVertex2f(((float[]) dots.get(i))[0], ((float[]) dots.get(i))[1]);
         GL11.glEnd();
     }
 
     private void drawSymbols(float alpha) {
         for (int i = 0; i < symbols.size(); i++) {
-            Symbol m = symbols.get(i);
+            Symbol m = (Symbol) symbols.get(i);
             Color c = COLORS[Math.max(0, Math.min(COLORS.length - 1, m.color))];
             drawSymbol(m.type, toSX(m.x), toSY(m.y), 9f, c, 1f * alpha);
         }
@@ -3339,16 +3344,107 @@ public class StarNotesPanel implements CustomUIPanelPlugin {
                 star(cx, cy, r * 1.15f);
                 fillCircle(cx, cy, 2f, 8);
                 break;
-            default: // ring
-                GL11.glLineWidth(3f);
-                GL11.glBegin(GL11.GL_LINE_LOOP);
-                for (int i = 0; i < 20; i++) {
-                    double ang = i * Math.PI * 2.0 / 20.0;
-                    GL11.glVertex2f(cx + (float) Math.cos(ang) * r, cy + (float) Math.sin(ang) * r);
+            case 6: // target: two rings, a centre dot and four ticks outside
+                GL11.glLineWidth(2.5f);
+                ring(cx, cy, r, 24);
+                ring(cx, cy, r * 0.5f, 16);
+                fillCircle(cx, cy, 2f, 8);
+                GL11.glBegin(GL11.GL_LINES);
+                GL11.glVertex2f(cx + r * 0.8f, cy); GL11.glVertex2f(cx + r * 1.4f, cy);
+                GL11.glVertex2f(cx - r * 0.8f, cy); GL11.glVertex2f(cx - r * 1.4f, cy);
+                GL11.glVertex2f(cx, cy + r * 0.8f); GL11.glVertex2f(cx, cy + r * 1.4f);
+                GL11.glVertex2f(cx, cy - r * 0.8f); GL11.glVertex2f(cx, cy - r * 1.4f);
+                GL11.glEnd();
+                break;
+            case 7: { // sun: a disc with eight rays
+                setColor(c, a * 0.35f);
+                fillCircle(cx, cy, r * 0.5f, 16);
+                setColor(c, a);
+                GL11.glLineWidth(2.5f);
+                ring(cx, cy, r * 0.5f, 16);
+                GL11.glBegin(GL11.GL_LINES);
+                for (int i = 0; i < 8; i++) {
+                    double ang = i * Math.PI / 4.0;
+                    float co = (float) Math.cos(ang), si = (float) Math.sin(ang);
+                    GL11.glVertex2f(cx + co * r * 0.72f, cy + si * r * 0.72f);
+                    GL11.glVertex2f(cx + co * r * 1.25f, cy + si * r * 1.25f);
                 }
                 GL11.glEnd();
+                break;
+            }
+            case 8: { // chest: a box with a rounded lid and a lock
+                float bx = cx - r, bw = 2f * r, by = cy - r * 0.8f, seam = cy + r * 0.1f;
+                setColor(c, a * 0.35f);
+                fillRect(bx, by, bw, seam - by);
+                GL11.glBegin(GL11.GL_TRIANGLE_FAN);
+                GL11.glVertex2f(cx, seam);
+                for (int i = 0; i <= 12; i++) {
+                    double ang = i * Math.PI / 12.0;
+                    GL11.glVertex2f(cx + (float) Math.cos(ang) * r, seam + (float) Math.sin(ang) * r * 0.7f);
+                }
+                GL11.glEnd();
+                setColor(c, a);
+                GL11.glLineWidth(2.5f);
+                GL11.glBegin(GL11.GL_LINE_LOOP);
+                GL11.glVertex2f(bx, by);
+                GL11.glVertex2f(bx + bw, by);
+                for (int i = 0; i <= 12; i++) {
+                    double ang = i * Math.PI / 12.0;
+                    GL11.glVertex2f(cx + (float) Math.cos(ang) * r, seam + (float) Math.sin(ang) * r * 0.7f);
+                }
+                GL11.glEnd();
+                GL11.glBegin(GL11.GL_LINES);
+                GL11.glVertex2f(bx, seam); GL11.glVertex2f(bx + bw, seam);
+                GL11.glEnd();
+                fillRect(cx - r * 0.18f, seam - r * 0.32f, r * 0.36f, r * 0.42f);
+                break;
+            }
+            case 9: { // skull: round cranium over a square jaw, solid eyes, teeth
+                float hy = cy + r * 0.2f, hr = r * 0.85f, jw = r * 0.45f, jb = cy - r * 0.95f;
+                // outline: the cranium from lower right round the top to lower left, then down round the jaw
+                float[] xs = new float[22], ys = new float[22];
+                for (int i = 0; i <= 18; i++) {
+                    double ang = Math.toRadians(-58.0 + i * (296.0 / 18.0));
+                    xs[i] = cx + (float) Math.cos(ang) * hr;
+                    ys[i] = hy + (float) Math.sin(ang) * hr;
+                }
+                xs[19] = cx - jw; ys[19] = jb;
+                xs[20] = cx + jw; ys[20] = jb;
+                xs[21] = cx + jw; ys[21] = ys[0];
+                setColor(c, a * 0.35f);
+                GL11.glBegin(GL11.GL_TRIANGLE_FAN);
+                GL11.glVertex2f(cx, cy);
+                for (int i = 0; i < 22; i++) GL11.glVertex2f(xs[i], ys[i]);
+                GL11.glVertex2f(xs[0], ys[0]);
+                GL11.glEnd();
+                setColor(c, a);
+                GL11.glLineWidth(2.5f);
+                GL11.glBegin(GL11.GL_LINE_LOOP);
+                for (int i = 0; i < 22; i++) GL11.glVertex2f(xs[i], ys[i]);
+                GL11.glEnd();
+                fillCircle(cx - r * 0.35f, cy + r * 0.05f, r * 0.24f, 10);
+                fillCircle(cx + r * 0.35f, cy + r * 0.05f, r * 0.24f, 10);
+                GL11.glLineWidth(1.5f);
+                GL11.glBegin(GL11.GL_LINES);
+                GL11.glVertex2f(cx - r * 0.15f, jb); GL11.glVertex2f(cx - r * 0.15f, jb + r * 0.3f);
+                GL11.glVertex2f(cx + r * 0.15f, jb); GL11.glVertex2f(cx + r * 0.15f, jb + r * 0.3f);
+                GL11.glEnd();
+                break;
+            }
+            default: // ring (5)
+                GL11.glLineWidth(3f);
+                ring(cx, cy, r, 20);
                 fillCircle(cx, cy, 2.2f, 8);
                 break;
         }
+    }
+
+    private void ring(float cx, float cy, float r, int seg) {
+        GL11.glBegin(GL11.GL_LINE_LOOP);
+        for (int i = 0; i < seg; i++) {
+            double ang = i * Math.PI * 2.0 / seg;
+            GL11.glVertex2f(cx + (float) Math.cos(ang) * r, cy + (float) Math.sin(ang) * r);
+        }
+        GL11.glEnd();
     }
 }

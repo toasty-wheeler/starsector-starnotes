@@ -40,7 +40,7 @@ Icon toolbar on the left; click a tool again to open its options.
 |---|---|
 | Pen | Freehand lines in 5 colors, 3 thicknesses, solid / dashed / dash-dot |
 | Eraser | Drag over a line, symbol or text to remove it, like the Windows Snipping Tool |
-| Symbols | Place X, square, triangle, diamond, star and ring markers; drag to move them |
+| Symbols | Place X, triangle, diamond, ring, target, sun, chest and skull markers; drag to move them |
 | Text | Click the map and type; 4 sizes, 5 colors; click text to edit or drag it |
 | Move | Drag symbols and text; drag empty space to pan |
 | Undo | Undo the last change (also Ctrl+Z) |
@@ -58,7 +58,7 @@ Icon toolbar on the left; click a tool again to open its options.
 - Press **N** on the campaign map for the full-screen window (Esc or Close to leave). The game pauses while it's open.
 - Or open the **Intel** screen, go to the **Exploration** tab, and pick **StarNotes** at the top of the list.
 
-The key can be changed in `data/config/settings.json` (`starnotes_hotkey`, an LWJGL key code: 49 = N, 37 = K, 38 = L...).
+With [LunaLib](https://github.com/Lukas22041/LunaLib) installed, rebind the key in its mod settings (F2 on the campaign map, then StarNotes), which also lists the controls. Without LunaLib, change it in `data/config/settings.json` (`starnotes_hotkey`, an LWJGL key code: 49 = N, 37 = K, 38 = L...).
 
 ![StarNotes in the Intel screen](docs/screenshots/intel-tab.png)
 
@@ -70,6 +70,7 @@ The key can be changed in `data/config/settings.json` (`starnotes_hotkey`, an LW
 | [LazyLib](https://github.com/LazyWizard/lazylib) | **Required**: draws the map and note text. Made with LazyLib 3.0.0. |
 
 Optional:
+- **LunaLib**: rebind the StarNotes key in its mod settings menu, with a list of the controls.
 - **Version Checker** / **TriOS**: StarNotes ships a `StarNotes.version` file pointing at this repository, so update checks and the changelog viewer work. TriOS also picks up the mod's icon.
 
 ## Installation
